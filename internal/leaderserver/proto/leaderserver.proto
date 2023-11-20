@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+option go_package = "gitlab.engr.illinois.edu/ckchu2/cs425-mp4/internal/leaderserver";
+
+package leaderserver;
+
+service LeaderServer {
+    rpc GetLeader(GetLeaderRequest) returns (GetLeaderReply) {}
+    rpc GetBlockInfo(GetBlockInfoRequest) returns (GetBlockInfoReply) {}
+    rpc GetFileOK(GetFileOKRequest) returns (GetFileOKReply) {}
+    rpc PutBlockInfo(PutBlockInfoRequest) returns (PutBlockInfoReply) {}
+    rpc PutFileOK(PutFileOKRequest) returns (PutFileOKReply) {}
+    rpc DelFile(DelFileRequest) returns (DelFileReply) {}
+    rpc GetMetadata(GetMetadataRequest) returns (GetMetadataReply) {}
+    rpc SetLeader(SetLeaderRequest) returns (SetLeaderReply) {}
+    rpc AcquireReadLock(AcquireLockRequest) returns (AcquireLockReply) {}
+    rpc ReleaseReadLock(ReleaseLockRequest) returns (ReleaseLockReply) {}
+    rpc AcquireWriteLock(AcquireLockRequest) returns (AcquireLockReply) {}
+    rpc ReleaseWriteLock(ReleaseLockRequest) returns (ReleaseLockReply) {}
+}
+
+message BlockInfo {
+    map<int64, BlockMeta> blockInfo = 1;
+}
+
+message BlockMeta {
+    repeated string hostNames = 1;
+    string fileName = 2;
+    int64  blockID = 3;
+}
+
+message GetLeaderRequest {}
+
+message GetLeaderReply {
+    string leader = 1;
+}
+
+message GetBlockInfoRequest {
+    string fileName = 1;
+}
+
+message GetBlockInfoReply {
+    map<int64, BlockMeta> blockInfo = 1;
+}
+
+message GetFileOKRequest {
+    string fileName = 1;
+}
+
+message GetFileOKReply {}
+
+message PutBlockInfoRequest {
+    string fileName = 1;
+    int64  fileSize = 2;
+}
+
+message PutBlockInfoReply {
+    map<int64, BlockMeta> blockInfo = 1;
+}
+
+message PutFileOKRequest {
+    string fileName = 1;
+    map<int64, BlockMeta> blockInfo = 2;
+}
+
+message PutFileOKReply {}
+
+message DelFileRequest {
+    string fileName = 1;
+}
+
+message DelFileReply {}
+
+message GetMetadataRequest {}
+
+message GetMetadataReply {
+    map<string, BlockInfo> fileInfo = 1;
+}
+
+message SetLeaderRequest {
+    string leader = 1;
+}
+
+message SetLeaderReply {
+    bool ok = 1;
+}
+
+
+message AcquireLockRequest {
+    string fileName = 1;
+}
+
+message AcquireLockReply {}
+
+message ReleaseLockRequest {
+    string fileName = 1;
+}
+
+message ReleaseLockReply {}

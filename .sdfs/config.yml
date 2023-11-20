@@ -1,0 +1,44 @@
+leader_server_port: "11111"
+data_server_port: "48763"
+member_server_port: "7132"
+command_server_port: "7133"
+blocks_dir: "./blocks"
+block_size: 10000000 # 10MB
+replication_factor: 4
+machines:
+  - hostname: "fa23-cs425-8701.cs.illinois.edu"
+    id: "1"
+  - hostname: "fa23-cs425-8702.cs.illinois.edu"
+    id: "2"
+  - hostname: "fa23-cs425-8703.cs.illinois.edu"
+    id: "3"
+  - hostname: "fa23-cs425-8704.cs.illinois.edu"
+    id: "4"
+  - hostname: "fa23-cs425-8705.cs.illinois.edu"
+    id: "5"
+  - hostname: "fa23-cs425-8706.cs.illinois.edu"
+    id: "6"
+  - hostname: "fa23-cs425-8707.cs.illinois.edu"
+    id: "7"
+  - hostname: "fa23-cs425-8708.cs.illinois.edu"
+    id: "8"
+  - hostname: "fa23-cs425-8709.cs.illinois.edu"
+    id: "9"
+  - hostname: "fa23-cs425-8710.cs.illinois.edu"
+    id: "10"
+heartbeat:
+  port: "7140"
+  interval: 500ms # send heartbeat every <interval> millisecond
+  drop_rate: 0.0
+  introducer: "fa23-cs425-8701.cs.illinois.edu"
+  targetNumber: 4
+failure_detect:
+  interval: 5000ms # check failure every <interval> millisecond
+  failure_timeout: 15000ms # set to failure if no heartbeat received for <timeout> millisecond
+  suspicion:
+    enable: true # enable suspicion
+    suspect_timeout: 10000ms # set to suspect if no heartbeat received for <timeout> millisecond
+    failure_timeout: 10000ms # set to failure if suspected and no heartbeat received for <timeout> millisecond
+cleanup:
+  interval: 1000ms # clean up left / failure every <interval> millisecond
+  timeout: 3000ms # remove from membership if left or failed for <timeout> millisecond

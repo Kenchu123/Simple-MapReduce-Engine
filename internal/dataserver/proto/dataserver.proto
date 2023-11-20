@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+option go_package = "gitlab.engr.illinois.edu/ckchu2/cs425-mp4/internal/dataserver";
+
+package dataserver;
+
+service DataServer {
+    rpc GetFileBlock(GetFileBlockRequest) returns (stream GetFileBlockReply) {}
+    rpc PutFileBlock(stream PutFileBlockRequest) returns (PutFileBlockReply) {}
+    rpc ReplicateFileBlock(ReplicateFileBlockRequest) returns (ReplicateFileBlockReply) {}
+}
+
+message GetFileBlockRequest {
+    string fileName = 1;
+    int64 blockID = 2;
+}
+
+message GetFileBlockReply {
+    bytes chunk = 1;
+}
+
+message PutFileBlockRequest {
+    string fileName = 1;
+    int64 blockID = 2;
+    bytes chunk = 3;
+}
+
+message PutFileBlockReply {
+    bool ok = 1;
+}
+
+message ReplicateFileBlockRequest {
+    string fileName = 1;
+    int64 blockID = 2;
+    string to = 3;
+}
+
+message ReplicateFileBlockReply {}
