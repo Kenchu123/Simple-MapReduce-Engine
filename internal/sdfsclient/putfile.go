@@ -76,8 +76,11 @@ func (c *Client) PutFile(localfilename, sdfsfilename string) error {
 					if err != nil {
 						return fmt.Errorf("Failed to put block %d of file %s to data server %s with error %w", blockID, sdfsfilename, hostname, err)
 					}
-					logrus.Infof("Put block %d of file %s to data server %s", blockID, sdfsfilename, hostname)
+					logrus.Infof("Put block %d of file %s with size %d to data server %s", blockID, sdfsfilename, n, hostname)
 				}
+				blockMeta := blockInfo[blockID]
+				blockMeta.BlockSize = int64(n)
+				blockInfo[blockID] = blockMeta
 				return nil
 			})
 		}(sdfsfilename, i, blockInfo)

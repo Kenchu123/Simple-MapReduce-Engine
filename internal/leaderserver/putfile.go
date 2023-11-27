@@ -38,15 +38,11 @@ func (l *LeaderServer) putBlockInfo(fileName string, fileSize int64) (metadata.B
 	}
 	blockInfo := map[int64]metadata.BlockMeta{}
 	for i := int64(0); i < blocksNum; i++ {
-		blockSize := l.blockSize
-		if i == blocksNum-1 && fileSize%l.blockSize != 0 {
-			blockSize = fileSize % l.blockSize
-		}
 		blockInfo[i] = metadata.BlockMeta{
 			HostNames: l.selectBlockHosts(),
 			FileName:  fileName,
 			BlockID:   i,
-			BlockSize: blockSize,
+			BlockSize: 0, // should be updated by client after put
 		}
 	}
 	return blockInfo, nil
