@@ -87,6 +87,13 @@ func (m *Metadata) GetBlockMeta(fileName string, blockID int64) (BlockMeta, erro
 }
 
 func (m *Metadata) AddOrUpdateBlockMeta(fileName string, blockMeta BlockMeta) error {
+	if !m.IsFileExist(fileName) {
+		m.mu.Lock()
+		m.FileInfo[fileName] = FileInfo{
+			BlockInfo: BlockInfo{},
+		}
+		m.mu.Unlock()
+	}
 	blockInfo, err := m.GetBlockInfo(fileName)
 	if err != nil {
 		return err

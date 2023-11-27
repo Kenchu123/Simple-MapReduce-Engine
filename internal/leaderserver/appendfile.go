@@ -29,12 +29,15 @@ func (l *LeaderServer) AppendBlockInfo(ctx context.Context, in *pb.AppendBlockIn
 
 // appendBlockInfo select the block to append the file
 func (l *LeaderServer) appendBlockInfo(fileName string, fileSize int64) (metadata.BlockInfo, error) {
+	// if the file does not exist, same as putting a new file
+	if !l.metadata.IsFileExist(fileName) {
+		return l.putBlockInfo(fileName, fileSize)
+	}
 	oldBlockInfo, err := l.metadata.GetBlockInfo(fileName)
-	toAppendBlockInfo := metadata.BlockInfo{}
-
 	if err != nil {
 		return nil, err
 	}
+	toAppendBlockInfo := metadata.BlockInfo{}
 	// get the last block id
 	lastBlockID := int64(-1)
 	for blockID := range oldBlockInfo {
@@ -88,8 +91,10 @@ func (l *LeaderServer) AppendFileOK(ctx context.Context, in *pb.AppendFileOKRequ
 			BlockID:   blockMeta.BlockID,
 			BlockSize: blockMeta.BlockSize,
 		}
-		l.metadata.AddOrUpdateBlockMeta(in.FileName, newBlockMeta)
-
+		err := l.metadata.AddOrUpdateBlockMeta(in.FileName, newBlockMeta)
+		if err != nil {
+			return nil, err
+		}
 	}
 	return &pb.AppendFileOKReply{}, nil
 }
