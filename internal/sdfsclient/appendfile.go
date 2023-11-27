@@ -77,6 +77,7 @@ func (c *Client) AppendFile(localfilename, sdfsfilename string) error {
 				for _, hostName := range hostNames {
 					logrus.Infof("Getting block %d of file %s from data server %s", blockMeta.BlockID, blockMeta.FileName, hostName)
 					firstBlockData, err = c.getFileBlock(hostName, blockMeta.FileName, blockMeta.BlockID)
+					firstBlockData = firstBlockData[:firstBlock.BlockSize]
 					if err != nil {
 						logrus.Infof("Failed to get block %d of file %s from data server %s with error %s", blockMeta.BlockID, blockMeta.FileName, hostName, err)
 						continue
