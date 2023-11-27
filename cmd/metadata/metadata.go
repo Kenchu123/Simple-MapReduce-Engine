@@ -23,7 +23,7 @@ func metadata(cmd *cobra.Command, args []string) {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	re, err := client.GetMetadata()
+	re, err := client.GetMetadataJSON()
 	if err != nil {
 		logrus.Fatal(err)
 	}

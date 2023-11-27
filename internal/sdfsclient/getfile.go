@@ -129,6 +129,7 @@ func (c *Client) getBlockInfo(leader, fileName string) (metadata.BlockInfo, erro
 			HostNames: blockMeta.HostNames,
 			FileName:  blockMeta.FileName,
 			BlockID:   blockMeta.BlockID,
+			BlockSize: blockMeta.BlockSize,
 		}
 	}
 	return blockInfo, nil

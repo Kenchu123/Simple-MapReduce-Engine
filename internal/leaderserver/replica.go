@@ -80,6 +80,7 @@ func (l *LeaderServer) recoverReplica() {
 				HostNames: alivedHostnames,
 				FileName:  fileName,
 				BlockID:   blockID,
+				BlockSize: blockMeta.BlockSize,
 			})
 
 			// if the alivedHostnames is less than replicaFactor, randomly select the hostname from the member list
@@ -140,6 +141,7 @@ func (l *LeaderServer) recoverReplica() {
 				HostNames: append(blockInfo.HostNames, toReplicate.To),
 				FileName:  toReplicate.FileName,
 				BlockID:   toReplicate.BlockID,
+				BlockSize: blockInfo.BlockSize,
 			})
 		}(toReplicate)
 	}

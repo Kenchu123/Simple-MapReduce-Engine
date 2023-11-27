@@ -90,17 +90,22 @@ func (l *LeaderServer) getLeader() string {
 func (l *LeaderServer) GetMetadata(ctx context.Context, in *pb.GetMetadataRequest) (*pb.GetMetadataReply, error) {
 	metadata := l.getMetadata()
 	getMetadaReply := &pb.GetMetadataReply{
-		FileInfo: map[string]*pb.BlockInfo{},
+		Metadata: &pb.Metadata{
+			FileInfo: map[string]*pb.FileInfo{},
+		},
 	}
 	for fileName, fileInfo := range metadata.GetFileInfo() {
-		getMetadaReply.FileInfo[fileName] = &pb.BlockInfo{
-			BlockInfo: map[int64]*pb.BlockMeta{},
+		getMetadaReply.Metadata.FileInfo[fileName] = &pb.FileInfo{
+			BlockInfo: &pb.BlockInfo{
+				BlockInfo: map[int64]*pb.BlockMeta{},
+			},
 		}
 		for blockID, blockMeta := range fileInfo.BlockInfo {
-			getMetadaReply.FileInfo[fileName].BlockInfo[blockID] = &pb.BlockMeta{
+			getMetadaReply.Metadata.FileInfo[fileName].BlockInfo.BlockInfo[blockID] = &pb.BlockMeta{
 				HostNames: blockMeta.HostNames,
 				FileName:  blockMeta.FileName,
 				BlockID:   blockMeta.BlockID,
+				BlockSize: blockMeta.BlockSize,
 			}
 		}
 	}

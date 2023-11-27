@@ -7,7 +7,7 @@ import (
 
 // Metadata handle metadata.
 type Metadata struct {
-	fileInfo map[string]FileInfo // map[fileName]BlockInfo}
+	FileInfo map[string]FileInfo
 	mu       sync.RWMutex
 }
 
@@ -23,12 +23,13 @@ type BlockMeta struct {
 	HostNames []string
 	FileName  string
 	BlockID   int64
+	BlockSize int64
 }
 
 // NewMetadata creates a new metadata.
 func NewMetadata() *Metadata {
 	return &Metadata{
-		fileInfo: make(map[string]FileInfo),
+		FileInfo: make(map[string]FileInfo),
 		mu:       sync.RWMutex{},
 	}
 }
@@ -36,23 +37,23 @@ func NewMetadata() *Metadata {
 func (m *Metadata) IsFileExist(fileName string) bool {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	_, ok := m.fileInfo[fileName]
+	_, ok := m.FileInfo[fileName]
 	return ok
 }
 
 func (m *Metadata) GetFileInfo() map[string]FileInfo {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	return m.fileInfo
+	return m.FileInfo
 }
 
 func (m *Metadata) GetBlockInfo(fileName string) (BlockInfo, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
-	if _, ok := m.fileInfo[fileName]; !ok {
+	if _, ok := m.FileInfo[fileName]; !ok {
 		return nil, fmt.Errorf("file %s not found", fileName)
 	}
-	return m.fileInfo[fileName].BlockInfo, nil
+	return m.FileInfo[fileName].BlockInfo, nil
 }
 
 // AddOrUpdateFile adds or updates a file to metadata.
@@ -60,15 +61,15 @@ func (m *Metadata) AddOrUpdateBlockInfo(fileName string, blockInfo BlockInfo) {
 	if !m.IsFileExist(fileName) {
 		m.mu.Lock()
 		defer m.mu.Unlock()
-		m.fileInfo[fileName] = FileInfo{
+		m.FileInfo[fileName] = FileInfo{
 			BlockInfo: blockInfo,
 		}
 	} else {
 		m.mu.Lock()
 		defer m.mu.Unlock()
-		fileInfo := m.fileInfo[fileName]
+		fileInfo := m.FileInfo[fileName]
 		fileInfo.BlockInfo = blockInfo
-		m.fileInfo[fileName] = fileInfo
+		m.FileInfo[fileName] = fileInfo
 	}
 }
 
@@ -99,5 +100,5 @@ func (m *Metadata) AddOrUpdateBlockMeta(fileName string, blockMeta BlockMeta) er
 func (m *Metadata) DelFile(fileName string) {
 	m.mu.Lock()
 	defer m.mu.Unlock()
-	delete(m.fileInfo, fileName)
+	delete(m.FileInfo, fileName)
 }

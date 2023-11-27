@@ -19,6 +19,14 @@ service LeaderServer {
     rpc ReleaseWriteLock(ReleaseLockRequest) returns (ReleaseLockReply) {}
 }
 
+message Metadata {
+    map<string, FileInfo> fileInfo = 1;
+}
+
+message FileInfo {
+    BlockInfo blockInfo = 1;
+}
+
 message BlockInfo {
     map<int64, BlockMeta> blockInfo = 1;
 }
@@ -27,6 +35,7 @@ message BlockMeta {
     repeated string hostNames = 1;
     string fileName = 2;
     int64  blockID = 3;
+    int64 blockSize = 4;
 }
 
 message GetLeaderRequest {}
@@ -74,7 +83,7 @@ message DelFileReply {}
 message GetMetadataRequest {}
 
 message GetMetadataReply {
-    map<string, BlockInfo> fileInfo = 1;
+    Metadata metadata = 1;
 }
 
 message SetLeaderRequest {

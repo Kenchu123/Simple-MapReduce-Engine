@@ -111,13 +111,14 @@ func (c *Client) putBlockInfo(leader, fileName string, fileSize int64) (metadata
 	if err != nil {
 		return nil, fmt.Errorf("failed to get block info: %v", err)
 	}
-	putBlockInforReplyBlockMeta := r.GetBlockInfo()
+	putBlockInfoReplyBlockMeta := r.GetBlockInfo()
 	blockInfo := metadata.BlockInfo{}
-	for blockID, blockMeta := range putBlockInforReplyBlockMeta {
+	for blockID, blockMeta := range putBlockInfoReplyBlockMeta {
 		blockInfo[blockID] = metadata.BlockMeta{
 			HostNames: blockMeta.HostNames,
 			FileName:  blockMeta.FileName,
 			BlockID:   blockMeta.BlockID,
+			BlockSize: blockMeta.BlockSize,
 		}
 	}
 	return blockInfo, nil
@@ -185,6 +186,7 @@ func (c *Client) putFileOK(hostname, fileName string, blockInfo metadata.BlockIn
 			HostNames: blockMeta.HostNames,
 			FileName:  blockMeta.FileName,
 			BlockID:   blockMeta.BlockID,
+			BlockSize: blockMeta.BlockSize,
 		}
 	}
 	_, err = client.PutFileOK(ctx, &leaderServerProto.PutFileOKRequest{

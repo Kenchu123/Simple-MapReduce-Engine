@@ -54,14 +54,15 @@ func (l *LeaderServer) syncMetadata() {
 		return
 	}
 	// Step3: update metadata
-	fileInfo := r.GetFileInfo()
-	for fileName, blockInfo := range fileInfo {
+	pbMetadata := r.GetMetadata()
+	for fileName, fileInfo := range pbMetadata.GetFileInfo() {
 		newBlockInfo := metadata.BlockInfo{}
-		for blockID, blockMeta := range blockInfo.GetBlockInfo() {
+		for blockID, blockMeta := range fileInfo.GetBlockInfo().GetBlockInfo() {
 			newBlockInfo[blockID] = metadata.BlockMeta{
 				BlockID:   blockMeta.GetBlockID(),
 				HostNames: blockMeta.GetHostNames(),
 				FileName:  blockMeta.GetFileName(),
+				BlockSize: blockMeta.GetBlockSize(),
 			}
 		}
 		l.metadata.AddOrUpdateBlockInfo(fileName, newBlockInfo)

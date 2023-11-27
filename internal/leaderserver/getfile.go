@@ -20,6 +20,7 @@ func (l *LeaderServer) GetBlockInfo(ctx context.Context, in *pb.GetBlockInfoRequ
 			HostNames: blockMeta.HostNames,
 			FileName:  blockMeta.FileName,
 			BlockID:   blockMeta.BlockID,
+			BlockSize: blockMeta.BlockSize,
 		}
 	}
 	return &pb.GetBlockInfoReply{

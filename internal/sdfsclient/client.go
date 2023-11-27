@@ -2,6 +2,7 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -71,13 +72,14 @@ func (c *Client) getMetadata(leader string) (*metadata.Metadata, error) {
 	}
 
 	newMetadata := metadata.NewMetadata()
-	for fileName, blockInfo := range r.GetFileInfo() {
+	for fileName, fileInfo := range r.GetMetadata().GetFileInfo() {
 		newBlockInfo := metadata.BlockInfo{}
-		for blockID, blockMeta := range blockInfo.GetBlockInfo() {
+		for blockID, blockMeta := range fileInfo.GetBlockInfo().GetBlockInfo() {
 			newBlockInfo[blockID] = metadata.BlockMeta{
 				HostNames: blockMeta.HostNames,
 				FileName:  blockMeta.FileName,
 				BlockID:   blockMeta.BlockID,
+				BlockSize: blockMeta.BlockSize,
 			}
 		}
 		newMetadata.AddOrUpdateBlockInfo(fileName, newBlockInfo)
@@ -85,7 +87,7 @@ func (c *Client) getMetadata(leader string) (*metadata.Metadata, error) {
 	return newMetadata, nil
 }
 
-func (c *Client) GetMetadata() (string, error) {
+func (c *Client) GetMetadataJSON() (string, error) {
 	leader, err := c.getLeader()
 	if err != nil {
 		return "", err
@@ -94,5 +96,6 @@ func (c *Client) GetMetadata() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return fmt.Sprintf("%+v", metadata), nil
+	s, _ := json.MarshalIndent(metadata, "", "  ")
+	return string(s), nil
 }
