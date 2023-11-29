@@ -23,6 +23,8 @@ type Config struct {
 	Heartbeat         Heartbeat     `yaml:"heartbeat"`
 	FailureDetect     FailureDetect `yaml:"failure_detect"`
 	Cleanup           Cleanup       `yaml:"cleanup"`
+	Scheduler         Scheduler     `yaml:"scheduler"`
+	TaskManager       TaskManager   `yaml:"task_manager"`
 }
 
 // Machine is the configuration for a single server
@@ -52,6 +54,16 @@ type FailureDetect struct {
 type Cleanup struct {
 	Interval time.Duration `yaml:"interval"` // clean up left / failure every <interval> millisecond
 	Timeout  time.Duration `yaml:"timeout"`  // remove from membership if left or failed for <timeout> millisecond
+}
+
+type Scheduler struct {
+	Hostname string `yaml:"hostname"`
+	Port     string `yaml:"port"`
+}
+
+type TaskManager struct {
+	Port     string `yaml:"port"`
+	NumTasks int64  `yaml:"num_tasks"`
 }
 
 var lock = &sync.Mutex{}

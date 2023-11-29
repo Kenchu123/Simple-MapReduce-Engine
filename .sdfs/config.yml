@@ -4,7 +4,7 @@ member_server_port: "7132"
 command_server_port: "7133"
 blocks_dir: "./blocks"
 block_size: 10000000 # 10MB
-replication_factor: 4
+replication_factor: 2
 machines:
   - hostname: "fa23-cs425-8701.cs.illinois.edu"
     id: "1"
@@ -42,3 +42,9 @@ failure_detect:
 cleanup:
   interval: 1000ms # clean up left / failure every <interval> millisecond
   timeout: 3000ms # remove from membership if left or failed for <timeout> millisecond
+scheduler:
+  hostname: "fa23-cs425-8701.cs.illinois.edu"
+  port: "8888"
+task_manager:
+  port: "8889"
+  num_tasks: 10 # maximum number of tasks on a node

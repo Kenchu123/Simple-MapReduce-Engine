@@ -10,10 +10,12 @@ import (
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/fail"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/get"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/join"
+	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/juice"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/leave"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/list_mem"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/list_self"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/ls"
+	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/maple"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/metadata"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/multiread"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/cmd/multiwrite"
@@ -40,4 +42,5 @@ func init() {
 
 	rootCmd.AddCommand(serve.New(), get.New(), put.New(), ls.New(), store.New(), metadata.New(), delete.New(), multiread.New(), multiwrite.New(), append.New())
 	rootCmd.AddCommand(join.New(), leave.New(), fail.New(), config.New(), list_mem.New(), list_self.New(), enable.New(), disable.New())
+	rootCmd.AddCommand(maple.New(), juice.New())
 }

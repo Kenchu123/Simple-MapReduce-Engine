@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+option go_package = "gitlab.engr.illinois.edu/ckchu2/cs425-mp4/internal/scheduler";
+
+package scheduler;
+
+service Scheduler {
+    rpc PutJob(PutJobRequest) returns (stream PutJobResponse);
+}
+
+message PutJobRequest {
+    string jobID = 1;
+    string type = 2;
+    repeated string params = 3;
+}
+
+message PutJobResponse {
+    string jobID = 1;
+    string message = 2;
+}
