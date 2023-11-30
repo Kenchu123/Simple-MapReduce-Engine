@@ -59,7 +59,7 @@ func (r *Reducer) Run(reducer func(lines []string, params []string, keyValues Ke
 		}
 	}
 	// write to a file
-	outputFile, err := os.OpenFile(r.OutputFilePath, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	outputFile, err := os.Create(r.OutputFilePath)
 	if err != nil {
 		logrus.Fatal(err)
 	}
