@@ -4,7 +4,7 @@ member_server_port: "7132"
 command_server_port: "7133"
 blocks_dir: "./blocks"
 block_size: 10000000 # 10MB
-replication_factor: 2
+replication_factor: 1
 machines:
   - hostname: "fa23-cs425-8701.cs.illinois.edu"
     id: "1"
@@ -47,4 +47,3 @@ scheduler:
   port: "8888"
 task_manager:
   port: "8889"
-  num_tasks: 10 # maximum number of tasks on a node

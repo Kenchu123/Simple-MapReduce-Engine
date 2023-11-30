@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+option go_package = "gitlab.engr.illinois.edu/ckchu2/cs425-mp4/internal/taskmanager";
+
+package taskmanager;
+
+service TaskManager {
+    rpc PutTask(PutTaskRequest) returns (stream PutTaskResponse);
+}
+
+message PutTaskRequest {
+    string taskID = 1;
+    string taskType = 2;
+    string exeFilename = 3;
+    string inputFilename = 4;
+    repeated string params = 5;
+}
+
+message PutTaskResponse {
+    string taskID = 1;
+    string message = 2;
+}

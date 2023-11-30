@@ -62,8 +62,7 @@ type Scheduler struct {
 }
 
 type TaskManager struct {
-	Port     string `yaml:"port"`
-	NumTasks int64  `yaml:"num_tasks"`
+	Port string `yaml:"port"`
 }
 
 var lock = &sync.Mutex{}

@@ -87,12 +87,16 @@ func (c *Client) getMetadata(leader string) (*metadata.Metadata, error) {
 	return newMetadata, nil
 }
 
-func (c *Client) GetMetadataJSON() (string, error) {
+func (c *Client) GetMetadata() (*metadata.Metadata, error) {
 	leader, err := c.getLeader()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
-	metadata, err := c.getMetadata(leader)
+	return c.getMetadata(leader)
+}
+
+func (c *Client) GetMetadataJSON() (string, error) {
+	metadata, err := c.GetMetadata()
 	if err != nil {
 		return "", err
 	}

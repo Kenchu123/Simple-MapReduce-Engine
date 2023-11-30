@@ -9,11 +9,11 @@ import (
 var configPath string
 
 var mapleCmd = &cobra.Command{
-	Use:     "maple <maple_exe> <num_maples> <sdfs_intermediate_filename_prefix> <sdfs_src_directory>",
+	Use:     "maple <maple_exe> <num_maples> <sdfs_intermediate_filename_prefix> <sdfs_src_directory> [params for maple_exe]",
 	Short:   "maple",
 	Long:    "maple runs a map function on the inputfile and outputs to outputprefix",
-	Example: "  maple wordcount 5 maple_intermediate_wc_ sdfs_src/",
-	Args:    cobra.ExactArgs(4),
+	Example: "  maple wordcount_regex 5 maple_intermediate_wc_ sdfs_src/ 'hello.*'",
+	Args:    cobra.MinimumNArgs(4),
 	Run:     maple,
 }
 
@@ -22,7 +22,7 @@ func maple(cmd *cobra.Command, args []string) {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	err = client.Maple(args[0], args[1], args[2], args[3])
+	err = client.Maple(args[0], args[1], args[2], args[3], args[4:])
 	if err != nil {
 		logrus.Fatal(err)
 	}

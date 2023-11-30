@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"strconv"
 	"time"
 
 	"github.com/sirupsen/logrus"
@@ -31,7 +32,11 @@ func NewClient(configPath string) (*JobClient, error) {
 	}, nil
 }
 
-func (c *JobClient) Maple(mapleExe, numMaples, sdfsIntermediateFileNamePrefix, sdfsSrcDirectory string) error {
+func (c *JobClient) Maple(mapleExe, numMaples, sdfsIntermediateFileNamePrefix, sdfsSrcDirectory string, mapleExeParams []string) error {
+	if _, err := strconv.Atoi(numMaples); err != nil {
+		return fmt.Errorf("numMaples must be an integer")
+	}
+
 	sdfsClient, err := sdfsclient.NewClient(c.configPath)
 	if err != nil {
 		return err
@@ -48,6 +53,7 @@ func (c *JobClient) Maple(mapleExe, numMaples, sdfsIntermediateFileNamePrefix, s
 		sdfsIntermediateFileNamePrefix,
 		sdfsSrcDirectory,
 	}
+	params = append(params, mapleExeParams...)
 	err = c.sendJob(c.config.Scheduler.Hostname, c.config.Scheduler.Port, enums.MAPLE, generateJobID(enums.MAPLE), params)
 	if err != nil {
 		return err
@@ -82,7 +88,9 @@ func (c *JobClient) sendJob(hostname, port, jobType, jobID string, params []stri
 		}
 		jobID := req.GetJobID()
 		message := req.GetMessage()
-		logrus.Infof("JobID: %s, Message: %s", jobID, message)
+		logrus.WithFields(logrus.Fields{
+			"jobID": jobID,
+		}).Infof(message)
 	}
 	return nil
 }
