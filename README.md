@@ -298,7 +298,6 @@ Global Flags:
 docker compose -f docker-compose.dev.yml up [-d] [--build]
 
 # on another session
-docker exec -it dev /bin/bash
 docker exec -it dev-m[1-10] /bin/bash
 
 $ go run main.go [command] [flags]
