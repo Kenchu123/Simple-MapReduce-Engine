@@ -22,5 +22,5 @@ func (c *Client) PutLines(lines []string, fileName string) error {
 	file.Close()
 
 	// put the temp file into sdfs
-	return c.PutFile(tempFileName, fileName)
+	return c.PutFileWithRetry(tempFileName, fileName)
 }

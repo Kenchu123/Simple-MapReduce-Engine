@@ -42,7 +42,7 @@ func (c *JobClient) Maple(mapleExe, numMaples, sdfsIntermediateFileNamePrefix, s
 		return err
 	}
 	// Put Maple Executable to SDFS
-	err = sdfsClient.PutFile(mapleExe, mapleExe)
+	err = sdfsClient.PutFileWithRetry(mapleExe, mapleExe)
 	if err != nil {
 		return err
 	}
@@ -76,7 +76,7 @@ func (c *JobClient) Juice(juiceExe, numJuices, sdfsIntermediateFileNamePrefix, s
 	}
 
 	// Put Juice Executable to SDFS
-	err = sdfsClient.PutFile(juiceExe, juiceExe)
+	err = sdfsClient.PutFileWithRetry(juiceExe, juiceExe)
 	if err != nil {
 		return err
 	}

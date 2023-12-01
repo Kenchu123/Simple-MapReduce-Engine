@@ -144,7 +144,7 @@ func (t *TaskManager) processMapleTask(task *Task) error {
 	for _, filename := range intermediateFiles {
 		func(filename string) {
 			eg.Go(func() error {
-				err := sdfsClient.AppendFile(foldername+"/"+filename, filename)
+				err := sdfsClient.AppendFileWithRetry(foldername+"/"+filename, filename)
 				if err != nil {
 					return err
 				}
@@ -230,7 +230,7 @@ func (t *TaskManager) processJuiceTask(task *Task) error {
 	}
 
 	// Step4: Upload output file to SDFS
-	err = sdfsClient.AppendFile(foldername+"/"+sdfsDestFilename, sdfsDestFilename)
+	err = sdfsClient.AppendFileWithRetry(foldername+"/"+sdfsDestFilename, sdfsDestFilename)
 	if err != nil {
 		return err
 	}
