@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 
 	"github.com/sirupsen/logrus"
@@ -58,6 +59,6 @@ func (m *Mapper) Run(mapper func(line string, params []string, keyValues KeyValu
 				logrus.Fatal(err)
 			}
 		}
+		fmt.Printf("Output file: %v\n", outputPath)
 	}
-	// TODO: output filenames
 }
