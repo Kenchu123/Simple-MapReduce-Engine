@@ -97,6 +97,7 @@ func (c *Client) GetFile(sdfsfilename, localfilename string) error {
 	}
 	logrus.Infof("Got all blocks of file %s from SDFS", sdfsfilename)
 	// Move the temp file to the local file
+	file.Close()
 	err = os.Rename(tempFileName, localfilename)
 	if err != nil {
 		return fmt.Errorf("failed to rename temp file %s to local file %s: %v", tempFileName, localfilename, err)

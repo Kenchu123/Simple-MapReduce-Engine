@@ -271,6 +271,9 @@ func (s *Scheduler) processJuiceJob(job *Job) error {
 
 	// split the job into numJuices tasks
 	taskFileCnt := len(filenames) / numJuices
+	if len(filenames)%numJuices != 0 {
+		taskFileCnt++
+	}
 	for i := 0; i < numJuices; i++ {
 		taskID := fmt.Sprintf("%s-%d", job.jobID, i)
 		taskFilenames := []string{}
@@ -325,7 +328,9 @@ func (s *Scheduler) getWorkers() ([]string, error) {
 	members := _membership.GetAliveMembers()
 	workers := []string{}
 	for _, member := range members {
-		workers = append(workers, member.GetName())
+		if member.GetName() != s.hostname {
+			workers = append(workers, member.GetName())
+		}
 	}
 	return workers, nil
 }
