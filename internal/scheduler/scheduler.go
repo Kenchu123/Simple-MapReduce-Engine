@@ -283,19 +283,6 @@ func (s *Scheduler) processJuiceJob(job *Job) error {
 		job.createJuiceTask(taskID, taskFilenames, juiceExe, sdfsDestFilename, sdfsIntermediateFilenamePrefix, juiceExeParams)
 	}
 
-	// // split the job into numJuices tasks
-	// for i := 0; i < numJuices; i++ {
-	// 	taskID := fmt.Sprintf("%s-%d", job.jobID, i)
-	// 	taskFilenames := []string{}
-	// 	for j := i; j < len(filenames); j += numJuices {
-	// 		taskFilenames = append(taskFilenames, filenames[j])
-	// 	}
-	// 	if len(taskFilenames) == 0 {
-	// 		continue
-	// 	}
-	// 	job.createJuiceTask(taskID, taskFilenames, juiceExe, sdfsDestFilename, sdfsIntermediateFilenamePrefix, juiceExeParams)
-	// }
-
 	err = s.scheduleTasks(job)
 	if err != nil {
 		return err
@@ -307,7 +294,6 @@ func (s *Scheduler) processJuiceJob(job *Job) error {
 func (s *Scheduler) scheduleTasks(job *Job) error {
 	job.Logf("Scheduling Tasks to Workers")
 	// schedule tasks to workers
-	// TODO: schedule on hash or range
 	wg := sync.WaitGroup{}
 	for _, taskID := range job.taskIDs {
 		task, ok := job.tasks.Load(taskID)
