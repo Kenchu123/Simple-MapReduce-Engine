@@ -2,7 +2,8 @@ package main
 
 import (
 	"fmt"
-	"strings"
+	"math/rand"
+	"regexp"
 
 	"github.com/spf13/cobra"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/exe/mapper"
@@ -19,26 +20,23 @@ var mapleCmd = &cobra.Command{
 
 func maple(cmd *cobra.Command, args []string) {
 	mapper := mapper.NewMapper(args[0], args[1], args[2:])
-	mapper.Run(demoMaple)
+	mapper.Run(filterMaple)
 }
 
-// demoMap
-func demoMaple(line string, params []string, keyValues mapper.KeyValues) error {
-	parts := strings.Split(line, ",")
-	// params[0] shsould be {Radio, Fiber, Fiber/Radio, None}
+// filterMap
+func filterMaple(line string, params []string, keyValues mapper.KeyValues) error {
+	// params[0] should be regex pattern
 	if len(params) != 1 {
 		return fmt.Errorf("Invalid params: %v", params)
 	}
-	if len(parts) > 10 && parts[10] == params[0] {
-		key := parts[9]
-		key = strings.TrimSpace(key)
-
-		if key == "" {
-			key = "Empty"
-		}
-		// replace '/' with '-'
-		key = strings.ReplaceAll(key, "/", "-")
-		keyValues["demo"] = append(keyValues["demo"], fmt.Sprintf("%s 1", key))
+	// check if the line matches the regex pattern
+	if matched, err := regexp.MatchString(params[0], line); err != nil {
+		return fmt.Errorf("Invalid regex pattern: %v", params[0])
+	} else if matched {
+		// key = random string int 1 to 10
+		// value = line
+		key := fmt.Sprintf("%d", rand.Intn(10))
+		keyValues[key] = append(keyValues[key], line)
 	}
 	return nil
 }
