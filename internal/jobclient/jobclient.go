@@ -62,6 +62,42 @@ func (c *JobClient) Maple(mapleExe, numMaples, sdfsIntermediateFileNamePrefix, s
 	return nil
 }
 
+func (c *JobClient) Juice(juiceExe, numJuices, sdfsIntermediateFileNamePrefix, sdfsDestFileName string, juiceExeParams []string, deleteInput int) error {
+	if _, err := strconv.Atoi(numJuices); err != nil {
+		return fmt.Errorf("numJuices must be an integer")
+	}
+	if deleteInput != 0 && deleteInput != 1 {
+		return fmt.Errorf("deleteInput must be 0 or 1")
+	}
+
+	sdfsClient, err := sdfsclient.NewClient(c.configPath)
+	if err != nil {
+		return err
+	}
+
+	// Put Juice Executable to SDFS
+	err = sdfsClient.PutFile(juiceExe, juiceExe)
+	if err != nil {
+		return err
+	}
+
+	// Send Job to Scheduler
+	params := []string{
+		juiceExe,
+		numJuices,
+		sdfsIntermediateFileNamePrefix,
+		sdfsDestFileName,
+		strconv.FormatBool(deleteInput != 0),
+	}
+	params = append(params, juiceExeParams...)
+	err = c.sendJob(c.config.Scheduler.Hostname, c.config.Scheduler.Port, enums.JUICE, generateJobID(enums.JUICE), params)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (c *JobClient) sendJob(hostname, port, jobType, jobID string, params []string) error {
 	conn, err := grpc.Dial(hostname+":"+port, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {

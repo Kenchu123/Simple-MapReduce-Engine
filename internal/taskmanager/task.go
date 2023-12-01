@@ -1,6 +1,7 @@
 package taskmanager
 
 import (
+	"context"
 	"fmt"
 	"os/exec"
 	"strings"
@@ -11,17 +12,18 @@ import (
 	client "gitlab.engr.illinois.edu/ckchu2/cs425-mp4/internal/sdfsclient"
 	pb "gitlab.engr.illinois.edu/ckchu2/cs425-mp4/internal/taskmanager/proto"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/internal/utils"
+	"golang.org/x/sync/errgroup"
 )
 
 type Task struct {
-	taskID        string
-	taskType      string
-	exeFilename   string
-	inputFilename string
-	params        []string
-	stream        pb.TaskManager_PutTaskServer
-	finished      chan<- bool
-	err           chan<- error
+	taskID         string
+	taskType       string
+	exeFilename    string
+	inputFilenames []string
+	params         []string
+	stream         pb.TaskManager_PutTaskServer
+	finished       chan<- bool
+	err            chan<- error
 }
 
 func (t *Task) Logf(format string, args ...interface{}) {
@@ -41,14 +43,14 @@ func (t *TaskManager) PutTask(in *pb.PutTaskRequest, stream pb.TaskManager_PutTa
 	fin := make(chan bool)
 	err := make(chan error)
 	task := &Task{
-		taskID:        in.GetTaskID(),
-		taskType:      in.GetTaskType(),
-		exeFilename:   in.GetExeFilename(),
-		inputFilename: in.GetInputFilename(),
-		params:        in.GetParams(),
-		stream:        stream,
-		finished:      fin,
-		err:           err,
+		taskID:         in.GetTaskID(),
+		taskType:       in.GetTaskType(),
+		exeFilename:    in.GetExeFilename(),
+		inputFilenames: in.GetInputFilenames(),
+		params:         in.GetParams(),
+		stream:         stream,
+		finished:       fin,
+		err:            err,
 	}
 	ctx := stream.Context()
 
@@ -68,7 +70,6 @@ func (t *TaskManager) PutTask(in *pb.PutTaskRequest, stream pb.TaskManager_PutTa
 }
 
 func (t *TaskManager) processTask(task *Task) {
-	task.Logf("Task Received %+v", task)
 	switch task.taskType {
 	case enums.MAPLE:
 		err := t.processMapleTask(task)
@@ -78,7 +79,7 @@ func (t *TaskManager) processTask(task *Task) {
 			return
 		}
 	case enums.JUICE:
-		err := t.processJuiceTask()
+		err := t.processJuiceTask(task)
 		if err != nil {
 			task.Logf("failed to process juice task: %v", err)
 			task.err <- err
@@ -90,13 +91,13 @@ func (t *TaskManager) processTask(task *Task) {
 }
 
 func (t *TaskManager) processMapleTask(task *Task) error {
+	task.Logf("Processing Maple Task %+v", task)
 	// Step0: create a folder for intermediate files
 	foldername := utils.GenerateRandomFileName()
 	err := utils.CreateLocalFolder(foldername)
 	if err != nil {
 		return err
 	}
-	logrus.Infof("created folder %s", foldername)
 	defer utils.DeleteLocalFolder(foldername)
 
 	// Step1: Download executable from SDFS
@@ -109,7 +110,12 @@ func (t *TaskManager) processMapleTask(task *Task) error {
 		return err
 	}
 	// Step2: Download input file from SDFS
-	err = sdfsClient.GetFile(task.inputFilename, foldername+"/"+task.inputFilename)
+	// maple should have only one input file
+	if len(task.inputFilenames) != 1 {
+		return fmt.Errorf("maple should have only one input file")
+	}
+	inputFilename := task.inputFilenames[0]
+	err = sdfsClient.GetFile(inputFilename, foldername+"/"+inputFilename)
 	if err != nil {
 		return err
 	}
@@ -122,7 +128,7 @@ func (t *TaskManager) processMapleTask(task *Task) error {
 	sdfsIntermediateFilenamePrefix := task.params[0]
 	args := []string{
 		"./" + task.exeFilename,
-		task.inputFilename,
+		inputFilename,
 		sdfsIntermediateFilenamePrefix,
 	}
 	args = append(args, task.params[1:]...)
@@ -130,17 +136,25 @@ func (t *TaskManager) processMapleTask(task *Task) error {
 		return err
 	}
 
-	// Step4: Upload intermediate files to SDFS
+	// Step4: Append intermediatefiles to SDFS
 	intermediateFiles, err := utils.ListLocalFilesWithPrefix(foldername, sdfsIntermediateFilenamePrefix)
 	if err != nil {
 		return err
 	}
-	// TODO: parallel the AppendFile calls
+	eg, _ := errgroup.WithContext(context.Background())
 	for _, filename := range intermediateFiles {
-		err := sdfsClient.AppendFile(foldername+"/"+filename, filename)
-		if err != nil {
-			return err
-		}
+		func(filename string) {
+			eg.Go(func() error {
+				err := sdfsClient.AppendFile(foldername+"/"+filename, filename)
+				if err != nil {
+					return err
+				}
+				return nil
+			})
+		}(filename)
+	}
+	if err := eg.Wait(); err != nil {
+		return err
 	}
 	task.Logf("Uploaded Intermediate Files to SDFS: %+v", intermediateFiles)
 	return nil
@@ -170,6 +184,57 @@ func execCommand(dir, name string, arg ...string) error {
 	return fmt.Errorf("failed to run command %s %s", name, strings.Join(arg, " "))
 }
 
-func (t *TaskManager) processJuiceTask() error {
+func (t *TaskManager) processJuiceTask(task *Task) error {
+	task.Logf("Processing Juice Task %+v", task)
+	// Step0: create a folder for intermediate files
+	foldername := utils.GenerateRandomFileName()
+	err := utils.CreateLocalFolder(foldername)
+	if err != nil {
+		return err
+	}
+	defer utils.DeleteLocalFolder(foldername)
+
+	// Step1: Download executable from SDFS
+	sdfsClient, err := client.NewClient(t.configPath)
+	if err != nil {
+		return err
+	}
+	err = sdfsClient.GetFile(task.exeFilename, foldername+"/"+task.exeFilename)
+	if err != nil {
+		return err
+	}
+
+	// Step2: Download input files from SDFS
+	// juice should have multiple input files
+	if len(task.inputFilenames) == 0 {
+		return fmt.Errorf("juice should have at least one input file")
+	}
+	_, err = sdfsClient.GetFiles(task.inputFilenames, foldername+"/")
+	if err != nil {
+		return err
+	}
+
+	// Step3: Run juice executable
+	if err := exec.Command("chmod", "755", foldername+"/"+task.exeFilename).Run(); err != nil {
+		return err
+	}
+	sdfsDestFilename := task.params[0]
+	sdfsIntermediateFilenamePrefix := task.params[1]
+	args := []string{
+		"./" + task.exeFilename,
+		sdfsIntermediateFilenamePrefix,
+		sdfsDestFilename,
+	}
+	args = append(args, task.params[2:]...)
+	if err := execCommand(foldername, "bash", "-c", strings.Join(args, " ")); err != nil {
+		return err
+	}
+
+	// Step4: Upload output file to SDFS
+	err = sdfsClient.AppendFile(foldername+"/"+sdfsDestFilename, sdfsDestFilename)
+	if err != nil {
+		return err
+	}
+	task.Logf("Uploaded Output File to SDFS: %+v", sdfsDestFilename)
 	return nil
 }

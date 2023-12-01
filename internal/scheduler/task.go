@@ -7,11 +7,11 @@ import (
 )
 
 type Task struct {
-	taskID        string
-	taskType      string
-	exeFilename   string
-	inputFilename string
-	params        []string
+	taskID         string
+	taskType       string
+	exeFilename    string
+	inputFilenames []string
+	params         []string
 }
 
 func NewMapleTask(id string, filename string, mapleExe string, sdfsIntermediateFileNamePrefix string, mapleExeParams []string) *Task {
@@ -20,11 +20,26 @@ func NewMapleTask(id string, filename string, mapleExe string, sdfsIntermediateF
 	}
 	params = append(params, mapleExeParams...)
 	return &Task{
-		taskID:        id,
-		taskType:      enums.MAPLE,
-		exeFilename:   mapleExe,
-		inputFilename: filename,
-		params:        params,
+		taskID:         id,
+		taskType:       enums.MAPLE,
+		exeFilename:    mapleExe,
+		inputFilenames: []string{filename},
+		params:         params,
+	}
+}
+
+func NewJuiceTask(id string, filenames []string, juiceExe string, sdfsDestFilename string, sdfsIntermediateFileNamePrefix string, juiceExeParams []string) *Task {
+	params := []string{
+		sdfsDestFilename,
+		sdfsIntermediateFileNamePrefix,
+	}
+	params = append(params, juiceExeParams...)
+	return &Task{
+		taskID:         id,
+		taskType:       enums.JUICE,
+		exeFilename:    juiceExe,
+		inputFilenames: filenames,
+		params:         params,
 	}
 }
 

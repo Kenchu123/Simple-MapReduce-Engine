@@ -106,12 +106,13 @@ func (s *Scheduler) processJob(job *Job) {
 	// process the job
 	switch job.jobType {
 	case enums.MAPLE:
-		err := s.processMapleJob(job)
-		if err != nil {
-			job.Logf("Error Processing Job: %v", err)
+		if err := s.processMapleJob(job); err != nil {
+			job.Logf("Error Processing Maple Job: %v", err)
 		}
 	case enums.JUICE:
-		s.processJuiceJob(job)
+		if err := s.processJuiceJob(job); err != nil {
+			job.Logf("Error Processing Juice Job: %v", err)
+		}
 	}
 	// send job finished message to client
 	job.Logf("Finished")
@@ -165,6 +166,8 @@ func (s *Scheduler) processMapleJob(job *Job) error {
 		}
 	}
 
+	logrus.Infof("total lines: %d", totalLines)
+
 	// split the job into multiple tasks
 	var taskCnt int64 = 0
 	for _, filename := range filenames {
@@ -179,12 +182,11 @@ func (s *Scheduler) processMapleJob(job *Job) error {
 			taskInputLines := totalLines / int64(numMaples)
 			taskInput := []string{}
 			var lineCnt int64 = 0
-			reader := bufio.NewReader(file)
-			for {
-				line, err := reader.ReadString('\n')
-				if err != nil {
-					break
-				}
+			scanner := bufio.NewScanner(file)
+			scanner.Split(bufio.ScanLines)
+
+			for scanner.Scan() {
+				line := scanner.Text()
 				taskInput = append(taskInput, line)
 				lineCnt++
 				if lineCnt == taskInputLines {
@@ -197,6 +199,9 @@ func (s *Scheduler) processMapleJob(job *Job) error {
 					taskInput = []string{}
 					lineCnt = 0
 				}
+			}
+			if err := scanner.Err(); err != nil {
+				return err
 			}
 			if len(taskInput) != 0 {
 				// put the part of the file into sdfs
@@ -223,10 +228,53 @@ func (s *Scheduler) processMapleJob(job *Job) error {
 	return nil
 }
 
-func (s *Scheduler) processJuiceJob(job *Job) {
+func (s *Scheduler) processJuiceJob(job *Job) error {
 	// split the job into multiple tasks
 	// send tasks to workers
 	job.Logf("Start Processing")
+
+	juiceExe := job.params[0]
+	numJuices, _ := strconv.Atoi(job.params[1])
+	sdfsIntermediateFilenamePrefix := job.params[2]
+	sdfsDestFilename := job.params[3]
+	deleteInput, _ := strconv.ParseBool(job.params[4])
+	juiceExeParams := job.params[5:]
+
+	// get the files that prefix with 'sdfsIntermediateFilenamePrefix' from sdfs
+	sdfsClient, err := client.NewClient(s.configPath)
+	if err != nil {
+		return err
+	}
+	filenames, err := utils.ListSDFSFilesWithPrefix(sdfsClient, sdfsIntermediateFilenamePrefix)
+	if err != nil {
+		return err
+	}
+	if deleteInput {
+		defer utils.DeleteSDFSFiles(sdfsClient, filenames)
+	}
+	job.Logf("Reduce Files %+v", filenames)
+
+	// TODO range partitions
+
+	// split the job into numJuices tasks
+	for i := 0; i < numJuices; i++ {
+		taskID := fmt.Sprintf("%s-%d", job.jobID, i)
+		taskFilenames := []string{}
+		for j := i; j < len(filenames); j += numJuices {
+			taskFilenames = append(taskFilenames, filenames[j])
+		}
+		if len(taskFilenames) == 0 {
+			continue
+		}
+		job.createJuiceTask(taskID, taskFilenames, juiceExe, sdfsDestFilename, sdfsIntermediateFilenamePrefix, juiceExeParams)
+	}
+
+	err = s.scheduleTasks(job)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (s *Scheduler) scheduleTasks(job *Job) error {
@@ -239,7 +287,6 @@ func (s *Scheduler) scheduleTasks(job *Job) error {
 		if !ok {
 			return fmt.Errorf("task %s not found", taskID)
 		}
-		// TODO: parallel
 		wg.Add(1)
 		go func(job *Job, task *Task) {
 			defer wg.Done()
@@ -295,11 +342,11 @@ func (s *Scheduler) putTask(job *Job, task *Task, worker string) error {
 
 	client := taskManagerProto.NewTaskManagerClient(conn)
 	stream, err := client.PutTask(context.Background(), &taskManagerProto.PutTaskRequest{
-		TaskID:        task.taskID,
-		TaskType:      task.taskType,
-		ExeFilename:   task.exeFilename,
-		InputFilename: task.inputFilename,
-		Params:        task.params,
+		TaskID:         task.taskID,
+		TaskType:       task.taskType,
+		ExeFilename:    task.exeFilename,
+		InputFilenames: task.inputFilenames,
+		Params:         task.params,
 	})
 	if err != nil {
 		return err
@@ -312,7 +359,7 @@ func (s *Scheduler) putTask(job *Job, task *Task, worker string) error {
 		if err != nil {
 			return err
 		}
-		job.Logf("Task %s: %s", resp.GetTaskID(), resp.GetMessage())
+		job.Logf("[%s] %s", resp.GetTaskID(), resp.GetMessage())
 	}
 	return nil
 }

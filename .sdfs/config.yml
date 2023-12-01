@@ -4,7 +4,7 @@ member_server_port: "7132"
 command_server_port: "7133"
 blocks_dir: "./blocks"
 block_size: 10000000 # 10MB
-replication_factor: 1
+replication_factor: 3
 machines:
   - hostname: "fa23-cs425-8701.cs.illinois.edu"
     id: "1"

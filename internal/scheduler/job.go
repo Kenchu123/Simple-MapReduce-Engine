@@ -39,3 +39,10 @@ func (j *Job) createMapleTask(taskID, filename, mapleExe, sdfsIntermediateFilena
 	j.tasks.Store(taskID, task)
 	j.Logf("Task Created: %+v", task)
 }
+
+func (j *Job) createJuiceTask(taskID string, filenames []string, juiceExe, sdfsDestFilename, sdfsIntermediateFilenamePrefix string, juiceExeParams []string) {
+	task := NewJuiceTask(taskID, filenames, juiceExe, sdfsDestFilename, sdfsIntermediateFilenamePrefix, juiceExeParams)
+	j.taskIDs = append(j.taskIDs, taskID)
+	j.tasks.Store(taskID, task)
+	j.Logf("Task Created: %+v", task)
+}

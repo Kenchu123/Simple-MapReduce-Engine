@@ -49,8 +49,22 @@ func ListLocalFilesWithPrefix(foldername, prefix string) ([]string, error) {
 		return nil, err
 	}
 	for _, file := range files {
-		if file.Name()[0:len(prefix)] == prefix {
+		if len(file.Name()) >= len(prefix) && file.Name()[0:len(prefix)] == prefix {
 			filenames = append(filenames, file.Name())
+		}
+	}
+	return filenames, nil
+}
+
+func ListSDFSFilesWithPrefix(sdfsClient *client.Client, prefix string) ([]string, error) {
+	var filenames []string
+	metadata, err := sdfsClient.GetMetadata()
+	if err != nil {
+		return nil, err
+	}
+	for filename := range metadata.GetFileInfo() {
+		if len(filename) >= len(prefix) && filename[0:len(prefix)] == prefix {
+			filenames = append(filenames, filename)
 		}
 	}
 	return filenames, nil

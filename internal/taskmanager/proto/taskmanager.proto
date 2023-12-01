@@ -12,7 +12,7 @@ message PutTaskRequest {
     string taskID = 1;
     string taskType = 2;
     string exeFilename = 3;
-    string inputFilename = 4;
+    repeated string inputFilenames = 4;
     repeated string params = 5;
 }
 

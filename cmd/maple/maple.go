@@ -12,7 +12,7 @@ var mapleCmd = &cobra.Command{
 	Use:     "maple <maple_exe> <num_maples> <sdfs_intermediate_filename_prefix> <sdfs_src_directory> [params for maple_exe]",
 	Short:   "maple",
 	Long:    "maple runs a map function on the inputfile and outputs to outputprefix",
-	Example: "  maple wordcount_regex 5 maple_intermediate_wc_ sdfs_src/ 'hello.*'",
+	Example: "  maple maple_wordcount_regex 5 maple_intermediate_wc_ sdfs_src/ 'hello.*'",
 	Args:    cobra.MinimumNArgs(4),
 	Run:     maple,
 }

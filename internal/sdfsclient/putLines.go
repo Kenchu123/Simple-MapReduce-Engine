@@ -14,7 +14,7 @@ func (c *Client) PutLines(lines []string, fileName string) error {
 	}
 	defer os.Remove(tempFileName)
 	for _, line := range lines {
-		_, err = file.WriteString(line)
+		_, err = file.WriteString(line + "\n")
 		if err != nil {
 			return err
 		}
