@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
-	"time"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/internal/enums"
@@ -163,7 +162,7 @@ func (t *TaskManager) processMapleTask(task *Task) error {
 // execCommand executes a command, retrying if the error is "text file busy"
 func execCommand(dir, name string, arg ...string) error {
 	exec.Command("sync").Run()
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 1; i++ {
 		cmd := exec.Command(name, arg...)
 		cmd.Dir = dir
 		cmd.Stdout = logrus.StandardLogger().Writer()
@@ -173,7 +172,7 @@ func execCommand(dir, name string, arg ...string) error {
 				if exitError.ExitCode() == 126 {
 					// text file busy, retry
 					logrus.Infof("text file busy, retrying...")
-					time.Sleep(1 * time.Second)
+					// time.Sleep(1 * time.Second)
 					continue
 				}
 			}

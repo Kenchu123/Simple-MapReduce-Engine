@@ -91,6 +91,8 @@ func (s *Scheduler) PutJob(in *pb.PutJobRequest, stream pb.Scheduler_PutJobServe
 		return nil
 	case <-ctx.Done():
 		logrus.Infof("Client of Job %s Disconnect", job.jobID)
+		job.cancelJob()
+		<-fin
 		s.jobs.Delete(job.jobID)
 		return nil
 	}
@@ -317,6 +319,10 @@ func (s *Scheduler) getWorkers() ([]string, error) {
 
 // scheduleTask will re-schedule on failure
 func (s *Scheduler) scheduleTask(job *Job, task *Task) error {
+	if task.cancelled {
+		job.Logf("Task %s Cancelled", task.taskID)
+		return nil
+	}
 	workers, err := s.getWorkers()
 	if err != nil {
 		return err

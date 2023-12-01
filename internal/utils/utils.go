@@ -9,7 +9,7 @@ import (
 
 func GenerateRandomFileName() string {
 	randomstring.Seed()
-	return randomstring.CookieFriendlyString(10)
+	return "temp-" + randomstring.CookieFriendlyString(10)
 }
 
 func CreateLocalFolder(foldername string) error {

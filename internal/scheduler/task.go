@@ -12,6 +12,7 @@ type Task struct {
 	exeFilename    string
 	inputFilenames []string
 	params         []string
+	cancelled      bool
 }
 
 func NewMapleTask(id string, filename string, mapleExe string, sdfsIntermediateFileNamePrefix string, mapleExeParams []string) *Task {
@@ -25,6 +26,7 @@ func NewMapleTask(id string, filename string, mapleExe string, sdfsIntermediateF
 		exeFilename:    mapleExe,
 		inputFilenames: []string{filename},
 		params:         params,
+		cancelled:      false,
 	}
 }
 
@@ -40,6 +42,7 @@ func NewJuiceTask(id string, filenames []string, juiceExe string, sdfsDestFilena
 		exeFilename:    juiceExe,
 		inputFilenames: filenames,
 		params:         params,
+		cancelled:      false,
 	}
 }
 
@@ -47,4 +50,8 @@ func (t *Task) Hash() uint64 {
 	h := fnv.New64a()
 	h.Write([]byte(t.taskID))
 	return h.Sum64()
+}
+
+func (t *Task) cancelTask() {
+	t.cancelled = true
 }

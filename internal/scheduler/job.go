@@ -46,3 +46,13 @@ func (j *Job) createJuiceTask(taskID string, filenames []string, juiceExe, sdfsD
 	j.tasks.Store(taskID, task)
 	j.Logf("Task Created: %+v", task)
 }
+
+func (j *Job) cancelJob() {
+	for _, taskID := range j.taskIDs {
+		task, ok := j.tasks.Load(taskID)
+		if !ok {
+			continue
+		}
+		task.(*Task).cancelTask()
+	}
+}

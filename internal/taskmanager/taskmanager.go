@@ -3,6 +3,7 @@ package taskmanager
 import (
 	"fmt"
 	"net"
+	"os"
 
 	"github.com/sirupsen/logrus"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/internal/config"
@@ -28,6 +29,15 @@ func NewTaskManager(config *config.Config, configPath string) *TaskManager {
 }
 
 func (t *TaskManager) Run() {
+	// check if self hostname not as same as scheduler
+	hostname, err := os.Hostname()
+	if err != nil {
+		logrus.Errorf("failed to get hostname: %v", err)
+		return
+	}
+	if hostname == t.config.Scheduler.Hostname {
+		return
+	}
 	listen, err := net.Listen("tcp", fmt.Sprintf(":%s", t.port))
 	if err != nil {
 		logrus.Fatalf("failed to listen on port %s: %v\n", t.port, err)
