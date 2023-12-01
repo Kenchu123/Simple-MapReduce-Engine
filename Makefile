@@ -21,6 +21,8 @@ clean:
 	rm juice_wordcount
 	rm maple_demo
 	rm juice_demo
+	rm maple_filter
+	rm juice_filter
 	rm filter
 	rm join
 	rm -rf logs/*/*.log

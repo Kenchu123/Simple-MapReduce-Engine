@@ -16,11 +16,11 @@ var juiceCmd = &cobra.Command{
 
 func juice(cmd *cobra.Command, args []string) {
 	reducer := reducer.NewReducer(args[0], args[1], args[2:])
-	reducer.Run(demoReducer)
+	reducer.Run(filterReducer)
 }
 
 // wordcount reducer
-func demoReducer(lines []string, params []string, keyValues reducer.KeyValue) error {
+func filterReducer(lines []string, params []string, keyValues reducer.KeyValue) error {
 	if len(lines) < 1 {
 		return nil
 	}

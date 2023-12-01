@@ -22,7 +22,7 @@ func maple(cmd *cobra.Command, args []string) {
 	mapper.Run(demoMaple)
 }
 
-// wordCountMap
+// demoMap
 func demoMaple(line string, params []string, keyValues mapper.KeyValues) error {
 	parts := strings.Split(line, ",")
 	// params[0] shsould be {Radio, Fiber, Fiber/Radio, None}

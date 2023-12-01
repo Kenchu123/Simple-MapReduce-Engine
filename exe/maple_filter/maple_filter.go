@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"regexp"
 
 	"github.com/spf13/cobra"
@@ -19,11 +20,11 @@ var mapleCmd = &cobra.Command{
 
 func maple(cmd *cobra.Command, args []string) {
 	mapper := mapper.NewMapper(args[0], args[1], args[2:])
-	mapper.Run(demoMaple)
+	mapper.Run(filterMaple)
 }
 
-// wordCountMap
-func demoMaple(line string, params []string, keyValues mapper.KeyValues) error {
+// filterMap
+func filterMaple(line string, params []string, keyValues mapper.KeyValues) error {
 	// params[0] should be regex pattern
 	if len(params) != 1 {
 		return fmt.Errorf("Invalid params: %v", params)
@@ -32,7 +33,10 @@ func demoMaple(line string, params []string, keyValues mapper.KeyValues) error {
 	if matched, err := regexp.MatchString(params[0], line); err != nil {
 		return fmt.Errorf("Invalid regex pattern: %v", params[0])
 	} else if matched {
-		keyValues["filter"] = append(keyValues["filter"], fmt.Sprintf("%s", line))
+		// key = random string int 1 to 10
+		// value = line
+		key := fmt.Sprintf("%d", rand.Intn(10))
+		keyValues[key] = append(keyValues[key], line)
 	}
 	return nil
 }
