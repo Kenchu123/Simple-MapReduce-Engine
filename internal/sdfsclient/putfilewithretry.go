@@ -7,6 +7,7 @@ import (
 	"github.com/sirupsen/logrus"
 )
 
+// PutFileWithRetry puts a file to SDFS with retry
 func (c *Client) PutFileWithRetry(localfilename, sdfsfilename string) error {
 	for i := 0; i < 5; i++ {
 		err := c.PutFile(localfilename, sdfsfilename)

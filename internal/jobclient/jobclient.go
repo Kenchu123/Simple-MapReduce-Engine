@@ -33,10 +33,6 @@ func NewClient(configPath string) (*JobClient, error) {
 }
 
 func (c *JobClient) Maple(mapleExe, numMaples, sdfsIntermediateFileNamePrefix, sdfsSrcDirectory string, mapleExeParams []string) error {
-	if _, err := strconv.Atoi(numMaples); err != nil {
-		return fmt.Errorf("numMaples must be an integer")
-	}
-
 	sdfsClient, err := sdfsclient.NewClient(c.configPath)
 	if err != nil {
 		return err
@@ -62,14 +58,7 @@ func (c *JobClient) Maple(mapleExe, numMaples, sdfsIntermediateFileNamePrefix, s
 	return nil
 }
 
-func (c *JobClient) Juice(juiceExe, numJuices, sdfsIntermediateFileNamePrefix, sdfsDestFileName string, juiceExeParams []string, deleteInput int) error {
-	if _, err := strconv.Atoi(numJuices); err != nil {
-		return fmt.Errorf("numJuices must be an integer")
-	}
-	if deleteInput != 0 && deleteInput != 1 {
-		return fmt.Errorf("deleteInput must be 0 or 1")
-	}
-
+func (c *JobClient) Juice(juiceExe, numJuices, sdfsIntermediateFileNamePrefix, sdfsDestFileName string, juiceExeParams []string, deleteInput int, partition string) error {
 	sdfsClient, err := sdfsclient.NewClient(c.configPath)
 	if err != nil {
 		return err
@@ -88,6 +77,7 @@ func (c *JobClient) Juice(juiceExe, numJuices, sdfsIntermediateFileNamePrefix, s
 		sdfsIntermediateFileNamePrefix,
 		sdfsDestFileName,
 		strconv.FormatBool(deleteInput != 0),
+		partition,
 	}
 	params = append(params, juiceExeParams...)
 	err = c.sendJob(c.config.Scheduler.Hostname, c.config.Scheduler.Port, enums.JUICE, generateJobID(enums.JUICE), params)

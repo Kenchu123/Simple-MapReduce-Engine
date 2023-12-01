@@ -1,6 +1,8 @@
 package maple
 
 import (
+	"strconv"
+
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/internal/jobclient"
@@ -18,6 +20,9 @@ var mapleCmd = &cobra.Command{
 }
 
 func maple(cmd *cobra.Command, args []string) {
+	if _, err := strconv.Atoi(args[1]); err != nil {
+		logrus.Fatal("num_maples must be an integer")
+	}
 	client, err := jobclient.NewClient(configPath)
 	if err != nil {
 		logrus.Fatal(err)

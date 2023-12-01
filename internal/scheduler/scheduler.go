@@ -5,8 +5,10 @@ import (
 	"context"
 	"fmt"
 	"io"
+	"math/rand"
 	"net"
 	"os"
+	"sort"
 	"strconv"
 	"sync"
 
@@ -238,7 +240,8 @@ func (s *Scheduler) processJuiceJob(job *Job) error {
 	sdfsIntermediateFilenamePrefix := job.params[2]
 	sdfsDestFilename := job.params[3]
 	deleteInput, _ := strconv.ParseBool(job.params[4])
-	juiceExeParams := job.params[5:]
+	partition := job.params[5]
+	juiceExeParams := job.params[6:]
 
 	// get the files that prefix with 'sdfsIntermediateFilenamePrefix' from sdfs
 	sdfsClient, err := client.NewClient(s.configPath)
@@ -254,13 +257,24 @@ func (s *Scheduler) processJuiceJob(job *Job) error {
 	}
 	job.Logf("Reduce Files %+v", filenames)
 
-	// TODO range partitions
+	// range partitions
+	switch partition {
+	case enums.RANGE_PARTITION:
+		sort.Strings(filenames)
+	case enums.HASH_PARTITION:
+		rand.Shuffle(len(filenames), func(i, j int) {
+			filenames[i], filenames[j] = filenames[j], filenames[i]
+		})
+	default:
+		return fmt.Errorf("partition must be %s or %s", enums.HASH_PARTITION, enums.RANGE_PARTITION)
+	}
 
 	// split the job into numJuices tasks
+	taskFileCnt := len(filenames) / numJuices
 	for i := 0; i < numJuices; i++ {
 		taskID := fmt.Sprintf("%s-%d", job.jobID, i)
 		taskFilenames := []string{}
-		for j := i; j < len(filenames); j += numJuices {
+		for j := i * taskFileCnt; j < (i+1)*taskFileCnt && j < len(filenames); j++ {
 			taskFilenames = append(taskFilenames, filenames[j])
 		}
 		if len(taskFilenames) == 0 {
@@ -268,6 +282,19 @@ func (s *Scheduler) processJuiceJob(job *Job) error {
 		}
 		job.createJuiceTask(taskID, taskFilenames, juiceExe, sdfsDestFilename, sdfsIntermediateFilenamePrefix, juiceExeParams)
 	}
+
+	// // split the job into numJuices tasks
+	// for i := 0; i < numJuices; i++ {
+	// 	taskID := fmt.Sprintf("%s-%d", job.jobID, i)
+	// 	taskFilenames := []string{}
+	// 	for j := i; j < len(filenames); j += numJuices {
+	// 		taskFilenames = append(taskFilenames, filenames[j])
+	// 	}
+	// 	if len(taskFilenames) == 0 {
+	// 		continue
+	// 	}
+	// 	job.createJuiceTask(taskID, taskFilenames, juiceExe, sdfsDestFilename, sdfsIntermediateFilenamePrefix, juiceExeParams)
+	// }
 
 	err = s.scheduleTasks(job)
 	if err != nil {
