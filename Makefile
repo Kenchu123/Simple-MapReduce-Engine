@@ -13,5 +13,9 @@ run:
 
 clean:
 	rm -rf bin
+	rm maple_wordcount
+	rm juice_wordcount
+	rm filter
+	rm join
 	rm -rf logs/*/*.log
 	rm -rf blocks/*/*

@@ -1,10 +1,10 @@
 # Simple Distributed File System
 
-UIUC CS425, Distributed Systems: Fall 2023 Machine Programming 3
+UIUC CS425, Distributed Systems: Fall 2023 Machine Programming 4
 
 ## Description
 
-See [MP Document](./docs/MP3.CS425.FA23.pdf)
+See [MP Document](./docs/MP4.CS425.FA23.pdf)
 
 ## Installation
 
@@ -33,7 +33,9 @@ Flags:
   -l, --log string      path to log file (default "logs/sdfs.log")
 ```
 
-### Join
+### Membership
+
+#### Join
 
 `join` command tells the machine to join the group.
 
@@ -46,7 +48,7 @@ Flags:
   -m, --machine-regex string   regex for machines to join (e.g. "0[1-9]") (default ".*")
 ```
 
-### Leave
+#### Leave
 
 `leave` command tells the machine to leave the group.
 
@@ -59,7 +61,7 @@ Flags:
   -m, --machine-regex string   regex for machines to join (e.g. "0[1-9]") (default ".*")
 ```
 
-### Fail
+#### Fail
 
 `fail` command tells the machine's process to fail.
 
@@ -72,7 +74,7 @@ Flags:
   -m, --machine-regex string   regex for machines to join (e.g. "0[1-9]") (default ".*")
 ```
 
-### List the Membership List
+#### List the Membership List
 
 `list_mem` command lists the membership list.
 
@@ -85,7 +87,7 @@ Flags:
   -m, --machine-regex string   regex for machines to join (e.g. "0[1-9]") (default ".*")
 ```
 
-### List Self's ID
+#### List Self's ID
 
 `list_self` command lists self's ID.
 
@@ -98,7 +100,7 @@ Flags:
   -m, --machine-regex string   regex for machines to join (e.g. "0[1-9]") (default ".*")
 ```
 
-### Enable/Disable Suspicion
+#### Enable/Disable Suspicion
 
 `enable suspicion` command enables suspicion.
 `disable suspicion` command disables suspicion.
@@ -147,7 +149,7 @@ Global Flags:
   -m, --machine-regex string   regex for machines to join (e.g. "0[1-9]") (default ".*")
 ```
 
-### SDFS
+### SDFS (Simple Distributed File System)
 
 #### Get File
 
