@@ -166,8 +166,6 @@ func (s *Scheduler) processMapleJob(job *Job) error {
 		}
 	}
 
-	logrus.Infof("total lines: %d", totalLines)
-
 	// split the job into multiple tasks
 	var taskCnt int64 = 0
 	for _, filename := range filenames {

@@ -243,6 +243,45 @@ Flags:
   -m, --machine-regex string   regex for machines to join (e.g. "0[1-9]") (default ".*")
 ```
 
+#### Maple (Map)
+
+`maple` command launches a map job.
+
+```bash
+Usage:
+  sdfs maple <maple_exe> <num_maples> <sdfs_intermediate_filename_prefix> <sdfs_src_directory> [params for maple_exe] [flags]
+
+Examples:
+  maple maple_wordcount_regex 5 maple_intermediate_wc_ sdfs_src- 'hello.*'
+
+Flags:
+  -c, --config string   path to config file (default ".sdfs/config.yml")
+  -h, --help            help for maple
+
+Global Flags:
+  -l, --log string   path to log file (default "logs/sdfs.log")
+```
+
+#### Juice (Reduce)
+
+`juice` command launches a reduce job.
+
+```bash
+Usage:
+  sdfs juice <juice_exe> <num_juices> <sdfs_intermediate_filename_prefix> <sdfs_dest_filename> [params] --delete_input={0,1} [flags]
+
+Examples:
+  juice juice_wordcount_regex 5 maple_intermediate_wc_ sdfs_dest 'hello.*' --delete_input=1
+
+Flags:
+  -c, --config string      path to config file (default ".sdfs/config.yml")
+  -d, --delete_input int   delete input files after juice
+  -h, --help               help for juice
+
+Global Flags:
+  -l, --log string   path to log file (default "logs/sdfs.log")
+```
+
 ## Development
 
 ### Prerequisites
