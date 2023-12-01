@@ -7,6 +7,8 @@ build:
 	go build -o juice_wordcount exe/juice_wordcount/juice_wordcount.go
 	go build -o maple_demo exe/maple_demo/maple_demo.go
 	go build -o juice_demo exe/juice_demo/juice_demo.go
+	go build -o maple_filter exe/maple_filter/maple_filter.go
+	go build -o juice_filter exe/juice_filter/juice_filter.go
 	go build -o filter sql/filter/filter.go
 	go build -o join sql/join/join.go
 
