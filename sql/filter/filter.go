@@ -39,8 +39,8 @@ func main() {
 		maplePath := "./maple_filter"
 		juicePath := "./juice_filter"
 		intermediate_prefix := fmt.Sprintf("%s_input%s-", timeArg, dataset)
-		inputSDFS := fmt.Sprintf("%s_input_%s", timeArg, dataset)
-		outputSDFS := fmt.Sprintf("%s_output_%s", timeArg, dataset)
+		inputSDFS := fmt.Sprintf("input_%s_%s", timeArg, dataset)
+		outputSDFS := fmt.Sprintf("output_%s_%s", timeArg, dataset)
 		execSDFSCommand("put", datasetPath, inputSDFS)
 		execSDFSCommand("maple", maplePath, "10", intermediate_prefix, inputSDFS, regexCondition)
 		execSDFSCommand("juice", juicePath, "10", intermediate_prefix, outputSDFS, "--delete_input", "1")
@@ -67,7 +67,7 @@ func execHadoopCommand(args ...string) {
 	}
 }
 func execSDFSCommand(args ...string) {
-	cmd := exec.Command("bin/sdfs", args...)
+	cmd := exec.Command("./sdfs", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {

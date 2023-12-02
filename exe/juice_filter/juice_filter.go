@@ -1,6 +1,8 @@
 package main
 
 import (
+	"strings"
+	
 	"github.com/spf13/cobra"
 	"gitlab.engr.illinois.edu/ckchu2/cs425-mp4/exe/reducer"
 )
@@ -26,6 +28,11 @@ func filterReducer(lines []string, params []string, keyValues reducer.KeyValue) 
 	}
 	// output format will be (key, _)
 	for _, line := range lines {
+		index := strings.Index(line, "")
+		if index == -1 {
+			continue;
+		}
+		line = line[index+1:]
 		keyValues[line] = ""
 	}
 	return nil
