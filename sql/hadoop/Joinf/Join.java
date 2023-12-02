@@ -42,7 +42,7 @@ public class Join {
                 if (columnMap.containsKey(keyFieldName)) {
                     int index = columnMap.get(keyFieldName);
                     if (index < parts.length) {
-                        context.write(new Text(parts[index]), new Text(datasetPrefix + value.toString()));
+                        context.write(new Text(parts[index]), new Text(datasetPrefix + ',' + value.toString()));
                     }
                 }
             }
@@ -64,22 +64,31 @@ public class Join {
     }
 
     public static class JoinReducer extends Reducer<Text, Text, Text, Text> {
-    @Override
-    public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
-        Set<String> uniquePairs = new HashSet<>();
+        @Override
+        public void reduce(Text key, Iterable<Text> values, Context context) throws IOException, InterruptedException {
+            Set<String> uniquePairs = new HashSet<>();
+            Set<String> uniqueData = new HashSet<>(); // Set to store unique data
+            List<Text> cache = new ArrayList<>();
 
-        for (Text val : values) {
-            String[] valueParts = val.toString().split("\t", 2);
-            if (valueParts.length == 2) {
-                String pair = valueParts[1];
-                if (!uniquePairs.contains(pair)) {
-                    uniquePairs.add(pair);
-                    context.write(null, new Text(pair));
+            for (Text val : values) {
+                String[] parts = val.toString().split(",");
+                uniquePairs.add(parts[0]);
+                cache.add(new Text(val));
+            }
+            
+            if (uniquePairs.size() == 2) {
+                for (Text val : cache) {
+                    int commaIndex = val.toString().indexOf(',');
+                    if (commaIndex != -1) {
+                        String data = val.toString().substring(commaIndex + 1);
+                        if (uniqueData.add(data)) { // Check if data is unique
+                            context.write(new Text(data), null);
+                        }
+                    }
                 }
             }
         }
     }
-}
 
 
     public static void main(String[] args) throws Exception {
