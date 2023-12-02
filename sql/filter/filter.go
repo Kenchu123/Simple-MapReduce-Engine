@@ -25,22 +25,22 @@ func main() {
 	dataset := strings.TrimSpace(strings.TrimPrefix(parts[0], "SELECT ALL FROM"))
 	regexCondition := parts[1]
 
-	time_arg := fmt.Sprintf("%d", time.Now().Unix())
+	timeArg := fmt.Sprintf("%d", time.Now().Unix())
 	datasetPath := dataset
 
 	if systemType == "hadoop" {
-		execHDFSCommand("-put", "-f", datasetPath, "/input")
+		execHDFSCommand("dfs", "-put", "-f", datasetPath, "/input")
 		fmt.Printf("Upload %s success!\n", dataset)
 		jarPath := "./filter.jar"
 		inputHadoop := "/input/" + dataset
-		outputHadoop := fmt.Sprintf("/output/%s%s", time_arg, dataset)
+		outputHadoop := fmt.Sprintf("/output/%s%s", timeArg, dataset)
 		execHadoopCommand("jar", jarPath, "Filter", inputHadoop, outputHadoop, regexCondition)
 	} else if systemType == "sdfs" {
 		maplePath := "./maple_filter"
 		juicePath := "./juice_filter"
-		intermediate_prefix := fmt.Sprintf("%s_input%s-", time_arg, dataset)
-		inputSDFS := fmt.Sprintf("%s_input_%s", time_arg, dataset)
-		outputSDFS := fmt.Sprintf("%s_output_%s", time_arg, dataset)
+		intermediate_prefix := fmt.Sprintf("%s_input%s-", timeArg, dataset)
+		inputSDFS := fmt.Sprintf("%s_input_%s", timeArg, dataset)
+		outputSDFS := fmt.Sprintf("%s_output_%s", timeArg, dataset)
 		execSDFSCommand("put", datasetPath, inputSDFS)
 		execSDFSCommand("maple", maplePath, "10", intermediate_prefix, inputSDFS, regexCondition)
 		execSDFSCommand("juice", juicePath, "10", intermediate_prefix, outputSDFS, "--delete_input", "1")

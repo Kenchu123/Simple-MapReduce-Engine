@@ -13,6 +13,7 @@ build:
 	go build -o juice_join exe/juice_join/juice_join.go
 	go build -o filter sql/filter/filter.go
 	go build -o join sql/join/join.go
+	cp sql/jar/*.jar .
 
 run:
 	go run main.go $(ARGS)
@@ -31,3 +32,4 @@ clean:
 	rm join
 	rm -rf logs/*/*.log
 	rm -rf blocks/*/*
+	rm *.jar
