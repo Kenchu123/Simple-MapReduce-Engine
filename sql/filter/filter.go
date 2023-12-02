@@ -10,42 +10,47 @@ import (
 )
 
 func main() {
-	if len(os.Args) < 7 {
-		log.Fatalf("Usage: ./Filter <hadoop or sdfs> SELECT ALL FROM <Dataset> WHERE <regex_condition>\n")
+	if len(os.Args) < 8 {
+		log.Fatalf("Usage: ./filter <hadoop or sdfs> SELECT ALL FROM <Dataset> WHERE <regex_condition>\n")
 	}
 
-	// Concatenate arguments to form the full command
-	fullCommand := strings.Join(os.Args[1:], " ")
+	systemType := os.Args[1]
+	fullCommand := strings.Join(os.Args[2:], " ")
 
-	// Check if the command is in the correct format
 	if !strings.HasPrefix(fullCommand, "SELECT ALL FROM ") || !strings.Contains(fullCommand, " WHERE ") {
-		log.Fatalf("Usage: ./Filter SELECT ALL FROM <Dataset> WHERE <regex_condition>\n")
+		log.Fatalf("Usage: ./filter <hadoop or sdfs> SELECT ALL FROM <Dataset> WHERE <regex_condition>\n")
 	}
 
-	// Extract dataset and regex condition
 	parts := strings.Split(fullCommand, " WHERE ")
 	dataset := strings.TrimSpace(strings.TrimPrefix(parts[0], "SELECT ALL FROM"))
 	regexCondition := parts[1]
 
-	// Step 1: Clear input and output directories on HDFS
-	//execHDFSCommand("-rm", "-r", "/user/jhihwei2/input/*")
-	//execHDFSCommand("-rm", "-r", "/user/jhihwei2/output/*")
-
-	// Step 2: Upload new dataset
+	time_arg := fmt.Sprintf("%d", time.Now().Unix())
 	datasetPath := dataset
-	execHDFSCommand("-put", "-f", datasetPath, "/user/jhihwei2/input")
-	fmt.Printf("Upload %s success!\n", dataset)
 
-	// Step 3: Execute MapReduce job
-	jarPath := "/home/jhihwei2/hadoop/Filterj.jar"
-	inputPath := "/user/jhihwei2/input/" + dataset
-	outputPath := fmt.Sprintf("/user/jhihwei2/output/%s_%d", dataset, time.Now().Unix())
-	execHadoopCommand("jar", jarPath, "Filter", inputPath, outputPath, regexCondition)
+	if systemType == "hadoop" {
+		execHDFSCommand("-put", "-f", datasetPath, "/input")
+		fmt.Printf("Upload %s success!\n", dataset)
+		jarPath := "./filter.jar"
+		inputHadoop := "/input/" + dataset
+		outputHadoop := fmt.Sprintf("/output/%s%s", time_arg, dataset)
+		execHadoopCommand("jar", jarPath, "Filter", inputHadoop, outputHadoop, regexCondition)
+	} else if systemType == "sdfs" {
+		maplePath := "./maple_filter"
+		juicePath := "./juice_filter"
+		intermediate_prefix := fmt.Sprintf("%s_input%s-", time_arg, dataset)
+		inputSDFS := fmt.Sprintf("%s_input_%s", time_arg, dataset)
+		outputSDFS := fmt.Sprintf("%s_output_%s", time_arg, dataset)
+		execSDFSCommand("put", datasetPath, inputSDFS)
+		execSDFSCommand("maple", maplePath, "10", intermediate_prefix, inputSDFS, regexCondition)
+		execSDFSCommand("juice", juicePath, "10", intermediate_prefix, outputSDFS, "--delete_input", "1")
+	} else {
+		log.Fatalf("Invalid system type. Use 'hadoop' or 'sdfs'.\n")
+	}
 }
 
 func execHDFSCommand(args ...string) {
-	hdfsArgs := append([]string{"dfs"}, args...)
-	cmd := exec.Command("/home/jhihwei2/hadoop/bin/hdfs", hdfsArgs...)
+	cmd := exec.Command("hdfs", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
@@ -54,10 +59,18 @@ func execHDFSCommand(args ...string) {
 }
 
 func execHadoopCommand(args ...string) {
-	cmd := exec.Command("/home/jhihwei2/hadoop/bin/hadoop", args...)
+	cmd := exec.Command("hadoop", args...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	if err := cmd.Run(); err != nil {
 		log.Fatalf("Hadoop Command failed: %v", err)
+	}
+}
+func execSDFSCommand(args ...string) {
+	cmd := exec.Command("bin/sdfs", args...)
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		log.Fatalf("SDFS Command failed: %v", err)
 	}
 }
