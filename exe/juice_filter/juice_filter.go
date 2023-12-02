@@ -19,7 +19,7 @@ func juice(cmd *cobra.Command, args []string) {
 	reducer.Run(filterReducer)
 }
 
-// wordcount reducer
+// filter reducer
 func filterReducer(lines []string, params []string, keyValues reducer.KeyValue) error {
 	if len(lines) < 1 {
 		return nil

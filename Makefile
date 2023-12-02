@@ -9,6 +9,8 @@ build:
 	go build -o juice_demo exe/juice_demo/juice_demo.go
 	go build -o maple_filter exe/maple_filter/maple_filter.go
 	go build -o juice_filter exe/juice_filter/juice_filter.go
+	go build -o maple_join exe/maple_join/maple_join.go
+	go build -o juice_join exe/juice_join/juice_join.go
 	go build -o filter sql/filter/filter.go
 	go build -o join sql/join/join.go
 
@@ -23,6 +25,8 @@ clean:
 	rm juice_demo
 	rm maple_filter
 	rm juice_filter
+	rm maple_join
+	rm juice_join
 	rm filter
 	rm join
 	rm -rf logs/*/*.log
