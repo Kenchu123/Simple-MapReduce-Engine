@@ -59,8 +59,14 @@ func main() {
 		inputSDFS1 := fmt.Sprintf("input_%s_%s", timeArg, dataset1)
 		inputSDFS2 := fmt.Sprintf("input_%s_%s", timeArg, dataset2)
 		outputSDFS := fmt.Sprintf("output_%s_%s", timeArg, dataset1)
-		keyIndex1, _ := getColumnIndex(dataset1, keyFieldName1)
-		keyIndex2, _ := getColumnIndex(dataset2, keyFieldName2)
+		keyIndex1, err := getColumnIndex(dataset1, keyFieldName1)
+		if err != nil {
+			log.Fatalf("Cannot find index according to the key in %s", dataset1)
+		}
+		keyIndex2, err := getColumnIndex(dataset2, keyFieldName2)
+		if err != nil {
+			log.Fatalf("Cannot find index according to the key in %s", dataset2)
+		}
 		execSDFSCommand("put", dataset1, inputSDFS1)
 		execSDFSCommand("put", dataset2, inputSDFS2)
 		execSDFSCommand("maple", maplePath, "10", intermediate_prefix, inputSDFS1, inputSDFS1, strconv.Itoa(keyIndex1))
