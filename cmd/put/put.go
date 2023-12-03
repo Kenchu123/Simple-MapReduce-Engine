@@ -7,6 +7,7 @@ import (
 )
 
 var configPath string
+var retry int
 
 var putCmd = &cobra.Command{
 	Use:     "put [localfilename] [sdfsfilename]",
@@ -22,7 +23,12 @@ func put(cmd *cobra.Command, args []string) {
 	if err != nil {
 		logrus.Fatal(err)
 	}
-	err = client.PutFile(args[0], args[1])
+	switch retry {
+	case 0:
+		err = client.PutFile(args[0], args[1])
+	default:
+		err = client.PutFileWithRetry(args[0], args[1])
+	}
 	if err != nil {
 		logrus.Fatal(err)
 	}
@@ -33,5 +39,6 @@ func New() *cobra.Command {
 }
 
 func init() {
+	putCmd.Flags().IntVarP(&retry, "retry", "r", 1, "retry or not")
 	putCmd.PersistentFlags().StringVarP(&configPath, "config", "c", ".sdfs/config.yml", "path to config file")
 }
