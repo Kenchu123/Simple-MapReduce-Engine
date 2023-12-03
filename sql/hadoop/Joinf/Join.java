@@ -21,30 +21,19 @@ public class Join {
     public static class GenericMapper extends Mapper<Object, Text, Text, Text> {
         private Map<String, Integer> columnMap = new HashMap<>();
         private boolean headerProcessed = false;
-        private String keyFieldName;
+        private String keyIndex;
         private String datasetPrefix;
 
         protected void setup(Context context, String keyField, String datasetPrefix) {
-            this.keyFieldName = context.getConfiguration().get(keyField);
+            this.keyIndex = context.getConfiguration().get(keyField);
             this.datasetPrefix = datasetPrefix;
         }
 
         @Override
         public void map(Object key, Text value, Context context) throws IOException, InterruptedException {
-            if (!headerProcessed) {
-                String[] header = value.toString().split(",");
-                for (int i = 0; i < header.length; i++) {
-                    columnMap.put(header[i], i);
-                }
-                headerProcessed = true;
-            } else {
-                String[] parts = value.toString().split(",");
-                if (columnMap.containsKey(keyFieldName)) {
-                    int index = columnMap.get(keyFieldName);
-                    if (index < parts.length) {
-                        context.write(new Text(parts[index]), new Text(datasetPrefix + ',' + value.toString()));
-                    }
-                }
+            String[] parts = value.toString().split(",");
+            if (Integer.valueOf(keyIndex) < parts.length) {
+                context.write(new Text(parts[Integer.valueOf(keyIndex)]), new Text(datasetPrefix + ',' + value.toString()));
             }
         }
     }
@@ -95,7 +84,7 @@ public class Join {
         Configuration conf = new Configuration();
         String[] otherArgs = new GenericOptionsParser(conf, args).getRemainingArgs();
         if (otherArgs.length != 5) {
-            System.err.println("Usage: Join <input1> <input2> <output> <keyFieldName1> <keyFieldName2>");
+            System.err.println("Usage: Join <input1> <input2> <output> <keyIndex1> <keyIndex2>");
             System.exit(2);
         }
 
