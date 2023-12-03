@@ -33,7 +33,7 @@ func main() {
 		fmt.Printf("Upload %s success!\n", dataset)
 		jarPath := "./filter.jar"
 		inputHadoop := "/input/" + dataset
-		outputHadoop := fmt.Sprintf("/output/%s_%s", timeArg, dataset)
+		outputHadoop := fmt.Sprintf("/output/output_%%s_%s", timeArg, dataset)
 		execHadoopCommand("jar", jarPath, "Filter", inputHadoop, outputHadoop, regexCondition)
 	} else if systemType == "sdfs" {
 		maplePath := "./maple_filter"
@@ -47,6 +47,7 @@ func main() {
 	} else {
 		log.Fatalf("Invalid system type. Use 'hadoop' or 'sdfs'.\n")
 	}
+	fmt.Printf("Output file name: output_%s_%s\n", timeArg, dataset)
 }
 
 func execHDFSCommand(args ...string) {

@@ -41,6 +41,14 @@ func main() {
 	keyFieldName1 := strings.TrimSpace(keyFields[0])
 	keyFieldName2 := strings.TrimSpace(keyFields[1])
 	timeArg := fmt.Sprintf("%d", time.Now().Unix())
+	keyIndex1, err := getColumnIndex(dataset1, keyFieldName1)
+	if err != nil {
+		log.Fatalf("Cannot find index according to the key in %s", dataset1)
+	}
+	keyIndex2, err := getColumnIndex(dataset2, keyFieldName2)
+	if err != nil {
+		log.Fatalf("Cannot find index according to the key in %s", dataset2)
+	}
 
 	if systemType == "hadoop" {
 		execHDFSCommand("dfs", "-put", "-f", dataset1, "/input")
@@ -53,7 +61,7 @@ func main() {
 		inputHadoop2 := "/input/" + dataset2
 		// interHadoop := fmt.Sprintf("/output/inter_%s_%s", timeArg, dataset1)
 		outputHadoop := fmt.Sprintf("/output/output_%s_%s", timeArg, dataset1)
-		execHadoopCommand("jar", jarPath, "Join", inputHadoop1, inputHadoop2, outputHadoop, keyFieldName1, keyFieldName2)
+		execHadoopCommand("jar", jarPath, "Join", inputHadoop1, inputHadoop2, outputHadoop, strconv.Itoa(keyIndex1), strconv.Itoa(keyIndex2))
 		// execHadoopCommand("jar", jarPath2, "Join2", interHadoop, outputHadoop)
 	} else if systemType == "sdfs" {
 		maplePath := "./maple_join"
@@ -62,14 +70,6 @@ func main() {
 		inputSDFS1 := fmt.Sprintf("input_%s_%s", timeArg, dataset1)
 		inputSDFS2 := fmt.Sprintf("input_%s_%s", timeArg, dataset2)
 		outputSDFS := fmt.Sprintf("output_%s_%s", timeArg, dataset1)
-		keyIndex1, err := getColumnIndex(dataset1, keyFieldName1)
-		if err != nil {
-			log.Fatalf("Cannot find index according to the key in %s", dataset1)
-		}
-		keyIndex2, err := getColumnIndex(dataset2, keyFieldName2)
-		if err != nil {
-			log.Fatalf("Cannot find index according to the key in %s", dataset2)
-		}
 		execSDFSCommand("put", dataset1, inputSDFS1)
 		execSDFSCommand("put", dataset2, inputSDFS2)
 		execSDFSCommand("maple", maplePath, "10", intermediate_prefix, inputSDFS1, inputSDFS1, strconv.Itoa(keyIndex1))
@@ -78,6 +78,7 @@ func main() {
 	} else {
 		log.Fatalf("Invalid system type. Use 'hadoop' or 'sdfs'.\n")
 	}
+	fmt.Printf("Output file name: output_%s_%s\n", timeArg, dataset1)
 }
 
 func getColumnIndex(dataset string, keyFieldName string) (int, error) {
