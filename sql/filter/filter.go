@@ -33,14 +33,14 @@ func main() {
 		fmt.Printf("Upload %s success!\n", dataset)
 		jarPath := "./filter.jar"
 		inputHadoop := "/input/" + dataset
-		outputHadoop := fmt.Sprintf("/output/%s%s", timeArg, dataset)
+		outputHadoop := fmt.Sprintf("/output/%s_%s", timeArg, dataset)
 		execHadoopCommand("jar", jarPath, "Filter", inputHadoop, outputHadoop, regexCondition)
 	} else if systemType == "sdfs" {
 		maplePath := "./maple_filter"
 		juicePath := "./juice_filter"
-		intermediate_prefix := fmt.Sprintf("%s_input%s-", timeArg, dataset)
-		inputSDFS := fmt.Sprintf("input_%s_%s", timeArg, dataset)
-		outputSDFS := fmt.Sprintf("output_%s_%s", timeArg, dataset)
+		intermediate_prefix := fmt.Sprintf("%s_%s-", timeArg, dataset)
+		inputSDFS := fmt.Sprintf("input_%s", timeArg, dataset)
+		outputSDFS := fmt.Sprintf("output_%s", timeArg, dataset)
 		execSDFSCommand("put", datasetPath, inputSDFS)
 		execSDFSCommand("maple", maplePath, "10", intermediate_prefix, inputSDFS, regexCondition)
 		execSDFSCommand("juice", juicePath, "10", intermediate_prefix, outputSDFS, "--delete_input", "1")

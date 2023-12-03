@@ -8,7 +8,7 @@ import (
 )
 
 var juiceCmd = &cobra.Command{
-	Use:     "juice <inputprefix> <outputfile>",
+	Use:     "juice <inputprefix> <outputfile> [params]",
 	Short:   "juice",
 	Long:    "juice runs a map function on the inputfile and outputs to outputprefix",
 	Example: "  juice inputfile outputprefix",
