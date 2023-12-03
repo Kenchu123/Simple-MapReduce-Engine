@@ -48,10 +48,13 @@ func main() {
 		fmt.Printf("Upload %s success!\n", dataset1)
 		fmt.Printf("Upload %s success!\n", dataset2)
 		jarPath := "./join.jar"
+		// jarPath2 := "./join2.jar"
 		inputHadoop1 := "/input/" + dataset1
 		inputHadoop2 := "/input/" + dataset2
-		outputHadoop := fmt.Sprintf("/output/%s_%s", timeArg, dataset1)
+		// interHadoop := fmt.Sprintf("/output/inter_%s_%s", timeArg, dataset1)
+		outputHadoop := fmt.Sprintf("/output/output_%s_%s", timeArg, dataset1)
 		execHadoopCommand("jar", jarPath, "Join", inputHadoop1, inputHadoop2, outputHadoop, keyFieldName1, keyFieldName2)
+		// execHadoopCommand("jar", jarPath2, "Join2", interHadoop, outputHadoop)
 	} else if systemType == "sdfs" {
 		maplePath := "./maple_join"
 		juicePath := "./juice_join"
