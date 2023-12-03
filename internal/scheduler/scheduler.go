@@ -349,6 +349,7 @@ func (s *Scheduler) scheduleTask(job *Job, task *Task) error {
 	err = s.putTask(job, task, worker)
 	if err != nil {
 		// reschedule to retry the task
+		job.Logf("Rescheduling Task %s: %v", task.taskID, err)
 		return s.scheduleTask(job, task)
 	}
 	return nil

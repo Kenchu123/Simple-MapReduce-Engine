@@ -29,6 +29,10 @@ func (c *Client) AppendFile(localfilename, sdfsfilename string) error {
 	if err != nil {
 		return fmt.Errorf("cannot get local file %s info: %v", localfilename, err)
 	}
+	if fileInfo.Size() == 0 {
+		logrus.Warning("Append empty file, do nothing")
+		return nil
+	}
 
 	// get leader, ask leader where to store the file, send the file to the data server
 	leader, err := c.getLeader()
@@ -49,7 +53,7 @@ func (c *Client) AppendFile(localfilename, sdfsfilename string) error {
 	if err != nil {
 		return err
 	}
-	logrus.Infof("Got blockInfo %+v", blockInfo)
+	logrus.Infof("Got blockInfo of file %s %+v", sdfsfilename, blockInfo)
 
 	// get the blockIDs
 	blockIDs := []int64{}
@@ -80,6 +84,9 @@ func (c *Client) AppendFile(localfilename, sdfsfilename string) error {
 					if err != nil {
 						logrus.Infof("Failed to get block %d of file %s from data server %s with error %s", blockMeta.BlockID, blockMeta.FileName, hostName, err)
 						continue
+					}
+					if len(firstBlockData) < int(firstBlock.BlockSize) {
+						return fmt.Errorf("got block %d of file %s from data server %s with size %d, expected size %d", blockMeta.BlockID, blockMeta.FileName, hostName, len(firstBlockData), firstBlock.BlockSize)
 					}
 					firstBlockData = firstBlockData[:firstBlock.BlockSize]
 					logrus.Infof("Got block %d of file %s from data server %s", blockMeta.BlockID, blockMeta.FileName, hostName)
