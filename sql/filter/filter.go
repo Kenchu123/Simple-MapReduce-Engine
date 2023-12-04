@@ -33,7 +33,7 @@ func main() {
 		fmt.Printf("Upload %s success!\n", dataset)
 		jarPath := "./filter.jar"
 		inputHadoop := "/input/" + dataset
-		outputHadoop := fmt.Sprintf("/output/output_%%s_%s", timeArg, dataset)
+		outputHadoop := fmt.Sprintf("/output/output_%s_%s", timeArg, dataset)
 		execHadoopCommand("jar", jarPath, "Filter", inputHadoop, outputHadoop, regexCondition)
 	} else if systemType == "sdfs" {
 		maplePath := "./maple_filter"
